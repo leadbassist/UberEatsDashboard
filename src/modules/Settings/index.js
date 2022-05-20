@@ -9,7 +9,7 @@ const Settings = () => {
   const [address, setAddress] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
 
-  const getAddressLatLng = async () => {
+  const getAddressLatLng = async (address) => {
     setAddress(address);
     const geocodedByAddress = await geocodeByAddress(address.label);
     const latLng = await getLatLng(geocodedByAddress[0]);
@@ -24,7 +24,8 @@ const Settings = () => {
         </Form.Item>
         <Form.Item label="Restaurant Address" required>
           <GooglePlacesAutocomplete
-            apiKey="AIzaSyBEOKbS3hOU5kUJ8tjK92C3Vd-Sb_wdElo"
+            apiKey="AIzaSyCuJSqVwcbcMFiIm7bRKPVFG6lGK0qoCkM"
+            // apiKey="AIzaSyCo88DfUDZWtQQEDaysJVz9lsPDHz-Vz2A"
             selectProps={{
               value: address,
               onChange: getAddressLatLng,
