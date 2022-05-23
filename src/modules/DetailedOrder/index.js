@@ -39,7 +39,7 @@ const DetailedOrder = () => {
 
   // console.log(order);
   // console.log(customer);
-  console.log(dishes);
+  // console.log(dishes);
 
   const acceptOrder = async () => {
     updateOrderStatus(OrderStatus.COOKING);
