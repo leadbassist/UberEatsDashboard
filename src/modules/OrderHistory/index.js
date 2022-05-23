@@ -1,40 +1,76 @@
+import { useState, useEffect } from "react";
+import { DataStore } from "aws-amplify";
 import { Card, Table, Tag } from "antd";
-import ordersHistory from "../../assets/data/orders-history.json";
+import { useRestaurantContext } from "../../contexts/RestaurantContext";
+import { Order, OrderStatus } from "../../models";
+import { useNavigate } from "react-router-dom";
 
 const OrderHistory = () => {
+  const [orders, setOrders] = useState([]);
+
+  const { restaurant } = useRestaurantContext();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!restaurant) {
+      return;
+    }
+    DataStore.query(Order, (order) =>
+      order
+        .orderRestaurantId("eq", restaurant.id)
+        .or((orderStatus) =>
+          orderStatus
+            .status("eq", "PICKED_UP")
+            .status("eq", "COMPLETED")
+            .status("eq", "DECLINED_BY_RESTAURANT")
+        )
+    ).then(setOrders);
+  }, [restaurant]);
+
+  const renderOrderStatus = (orderStatus) => {
+    const statusToColor = {
+      [OrderStatus.PICKED_UP]: "orange",
+      [OrderStatus.COMPLETED]: "green",
+      [OrderStatus.DECLINED_BY_RESTAURANT]: "red",
+    };
+
+    return <Tag color={statusToColor[orderStatus]}>{orderStatus}</Tag>;
+  };
   const tableColumns = [
     {
       title: "Order ID",
-      dataIndex: "orderID",
-      key: "orderID",
+      dataIndex: "id",
+      key: "id",
     },
     {
-      title: "Delivery Address",
-      dataIndex: "deliveryAddress",
-      key: "deliveryAddress",
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
       title: "Price",
-      dataIndex: "price",
-      key: "price",
+      dataIndex: "total",
+      key: "total",
       render: (price) => `$ ${price}`,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => (
-        <Tag color={status === "Delivered" ? "green" : "red"}>{status}</Tag>
-      ),
+      render: renderOrderStatus,
     },
   ];
 
   return (
     <Card title={"Order History"} style={styles.root}>
       <Table
-        dataSource={ordersHistory}
+        dataSource={orders}
         columns={tableColumns}
-        rowKey="orderID"
+        rowKey="id"
+        onRow={(orderItem) => ({
+          onClick: () => navigate(`/order/${orderItem.id}`),
+        })}
       />
     </Card>
   );
